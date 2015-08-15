@@ -48,7 +48,7 @@ class Dispatcher {
 
         list($beforeFilter, $afterFilter) = $this->parseFilters($filters);
 
-        if(($response = $this->dispatchFilters($beforeFilter)) !== null)
+        if(($response = $this->dispatchFilters($beforeFilter, null, $handler)) !== null)
         {
             return $response;
         }
@@ -57,7 +57,7 @@ class Dispatcher {
         
         $response = call_user_func_array($resolvedHandler, $vars);
 
-        return $this->dispatchFilters($afterFilter, $response);
+        return $this->dispatchFilters($afterFilter, $response, $handler);
     }
 
     /**
@@ -67,13 +67,13 @@ class Dispatcher {
      * @param null $response
      * @return mixed|null
      */
-    private function dispatchFilters($filters, $response = null)
+    private function dispatchFilters($filters, $response = null, $routeHandler = null)
     {
         while($filter = array_shift($filters))
         {
         	$handler = $this->handlerResolver->resolve($filter);
         	
-            if(($filteredResponse = call_user_func($handler, $response)) !== null)
+            if(($filteredResponse = call_user_func($handler, $response, $routeHandler)) !== null)
             {
                 return $filteredResponse;
             }
